@@ -81,7 +81,7 @@ with sqlite3.connect(db_name) as con:
 
 threading.Thread(target=check_availability).start()
 
-app = Flask(__name__)
+app = Flask(__name__, host="0.0.0.0", port="5000")
 
 @app.route('/')
 def hello_world():
