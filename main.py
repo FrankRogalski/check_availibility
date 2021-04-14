@@ -77,7 +77,6 @@ options = {
     1: "Ja", 
     0.5: "Weiß nicht mein Internet ist down"
 }
-threading.Thread(target=check_availability).start()
 with sqlite3.connect(db_name) as con:
     cur = con.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS availability (date text, up boolean, site text)")
