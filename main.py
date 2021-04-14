@@ -62,8 +62,10 @@ def update_data(now):
         ax.get_figure().savefig("static/test.png", bbox_inches='tight')
         max_index = data.index.max()
         newest_data = data[max_index]
-        if type(newest_data) != "numpy.int64":
+        try:
             newest_data = newest_data.iloc[-1]
+        except AttributeError:
+            pass
         return options[newest_data]
 
 matplotlib.use('Agg')
@@ -93,6 +95,17 @@ def hello_world():
         up = update_data(now)
         last_update = now
     return render_template('hello.html', up=up)
+
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
 
 if __name__ == '__main__':
     app.run(port=5000, host="0.0.0.0")
