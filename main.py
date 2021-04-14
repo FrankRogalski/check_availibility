@@ -61,7 +61,9 @@ def update_data(now):
         ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%d.%m %H:%M"))
         ax.get_figure().savefig("static/test.png", bbox_inches='tight')
         max_index = data.index.max()
-        newest_data = data[max_index].iloc[-1]
+        newest_data = data[max_index]
+        if type(newest_data) != "numpy.int64":
+            newest_data = newest_data.iloc[-1]
         return options[newest_data]
 
 matplotlib.use('Agg')
