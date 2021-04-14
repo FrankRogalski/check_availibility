@@ -85,10 +85,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    global up
+    global up, last_update
     now = datetime.datetime.now()
     if last_update < now - datetime.timedelta(minutes=1):
         up = update_data(now)
+        last_update = now
     return render_template('hello.html', up=up)
 
 if __name__ == '__main__':
