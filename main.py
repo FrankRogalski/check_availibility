@@ -1,13 +1,14 @@
 from flask import Flask
 from flask import render_template
 import pandas as pd
-import matplotlib.dates as mdates
+import matplotlib
+from matplotlib.dates import DateFormatter
+from matplotlib.ticker import FuncFormatter
 import datetime
 import sqlite3
 import requests
 import time
 import threading
-import matplotlib
 
 def ping(url):
     try:
@@ -41,6 +42,9 @@ def type_to_number(line):
         return 1
     else:
         return 0 if line["site"] == "shop" else 0.5
+    
+def form(num, _):
+    return {1: "Online", 0.5: "Lokale Probleme", 0: "Offline"}[num]
 
 def update_data(now):
     with sqlite3.connect(db_name) as con:
@@ -52,14 +56,15 @@ def update_data(now):
             figsize=(20, 10),
             grid=True,
             legend=False,
-            yticks=[],
+            yticks=(0, 0.5, 1),
             title="Graph der System Verfügbarkeit",
             ylabel="System Verfügbarkeit",
             xlabel="Zeitpunkt",
             ylim=(-0.1, 1.1),
             rot=0,
         )
-        ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%d.%m %H:%M"))
+        ax.get_yaxis().set_major_formatter(FuncFormatter(form))
+        ax.get_xaxis().set_major_formatter(DateFormatter("%d.%m %H:%M"))
         ax.get_figure().savefig("static/test.png", bbox_inches='tight')
         max_index = data.index.max()
         newest_data = data[max_index]
