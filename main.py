@@ -1,14 +1,13 @@
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template
 import pandas as pd
 import matplotlib
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import FuncFormatter
-import datetime
+from datetime import datetime, timedelta
 import sqlite3
 import requests
-import time
-import threading
+from time import sleep
+from threading import Thread
 
 def ping(url):
     try:
@@ -19,7 +18,7 @@ def ping(url):
     return False
 
 def insert(availiable, site, cur, con):
-    date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cur.execute(f"INSERT INTO availability VALUES('{date}', '{availiable}', '{site}')")
     con.commit()
 
@@ -35,7 +34,7 @@ def check_availability():
                 insert("false", "shop", cur, con)
             else:
                 insert("true", "shop", cur, con)
-            time.sleep(60)
+            sleep(60)
 
 def type_to_number(line):
     if line["up"] == "true":
@@ -48,7 +47,7 @@ def form(num, _):
 
 def update_data(now):
     with sqlite3.connect(db_name) as con:
-        date = (now - datetime.timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
+        date = (now - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
         df = pd.read_sql(f"SELECT * FROM availability WHERE date > '{date}'", con, parse_dates=["date"])
         df.set_index("date", inplace=True)
         data = df.apply(type_to_number, axis=1)
@@ -76,7 +75,7 @@ def update_data(now):
 
 matplotlib.use('Agg')
 db_name = "logs.db"
-last_update = datetime.datetime.now() - datetime.timedelta(minutes=1)
+last_update = datetime.now() - timedelta(minutes=1)
 up=None
 options = {
     0: "Nein", 
@@ -88,15 +87,15 @@ with sqlite3.connect(db_name) as con:
     cur.execute("CREATE TABLE IF NOT EXISTS availability (date text, up boolean, site text)")
     cur.execute("CREATE INDEX IF NOT EXISTS availability_index on availability(date)")
 
-threading.Thread(target=check_availability).start()
+Thread(target=check_availability).start()
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
     global up, last_update
-    now = datetime.datetime.now()
-    if last_update < now - datetime.timedelta(minutes=1):
+    now = datetime.now()
+    if last_update < now - timedelta(minutes=1):
         up = update_data(now)
         last_update = now
     return render_template('hello.html', up=up)
