@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 import pandas as pd
 import matplotlib
+import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import FuncFormatter
 from datetime import datetime, timedelta
@@ -65,6 +66,7 @@ def update_data(now):
         ax.get_yaxis().set_major_formatter(FuncFormatter(form))
         ax.get_xaxis().set_major_formatter(DateFormatter("%d.%m %H:%M"))
         ax.get_figure().savefig("static/test.png", bbox_inches='tight')
+        plt.clf()
         max_index = data.index.max()
         newest_data = data[max_index]
         try:
