@@ -56,6 +56,7 @@ def update_data(now):
             title="Graph der System Verfügbarkeit",
             ylabel="System Verfügbarkeit",
             xlabel="Zeitpunkt",
+            ylim=(-0.1, 1.1),
             rot=0,
         )
         ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%d.%m %H:%M"))
