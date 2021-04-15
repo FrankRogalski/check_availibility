@@ -9,6 +9,9 @@ import sqlite3
 import requests
 from time import sleep
 from threading import Thread
+import env
+import smtplib
+import ssl
 
 def ping(url):
     try:
@@ -22,8 +25,24 @@ def insert(availiable, site, cur, con):
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cur.execute(f"INSERT INTO availability VALUES('{date}', '{availiable}', '{site}')")
     con.commit()
+    
+def send_mail():
+    port = 465 
+    smtp_server = "smtp.gmail.com"
+    sender_email = "hansaFlexMonitoring@gmail.com"
+    receiver_email = "frank.rogalski@hansa-flex.com"
+    message = """\
+Subject: Prod Down
+
+Das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gebenenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben"""
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, env.password)
+        server.sendmail(sender_email, receiver_email, message)
 
 def check_availability():
+    global last_send
     with sqlite3.connect(db_name) as con:
         url_to_check = "https://shop.hansa-flex.com/"
         sanity_url = "https://google.com"
@@ -33,6 +52,10 @@ def check_availability():
                 insert("false", "google", cur, con)
             elif not ping(url_to_check):
                 insert("false", "shop", cur, con)
+                now = datetime.now()
+                if last_send < now - timedelta(minutes=5):
+                    send_mail()
+                    last_send = now
             else:
                 insert("true", "shop", cur, con)
             sleep(60)
@@ -78,6 +101,7 @@ def update_data(now):
 matplotlib.use('Agg')
 db_name = "logs.db"
 last_update = datetime.now() - timedelta(minutes=1)
+last_send = datetime.now() - timedelta(minutes=5)
 up=None
 options = {
     0: "Nein", 
@@ -101,17 +125,6 @@ def hello_world():
         up = update_data(now)
         last_update = now
     return render_template('hello.html', up=up)
-
-@app.after_request
-def add_header(r):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
-    return r
 
 if __name__ == '__main__':
     app.run(port=5000, host="0.0.0.0")
