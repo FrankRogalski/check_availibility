@@ -28,19 +28,22 @@ def insert(availiable, site, cur, con):
     con.commit()
     
 def send_mail():
-    port = 465 
-    smtp_server = "smtp.gmail.com"
-    sender_email = "hansaFlexMonitoring@gmail.com"
-    receiver_email = "frank.rogalski@hansa-flex.com"
-    message = """\
+    try:
+        port = 465 
+        smtp_server = "smtp.gmail.com"
+        sender_email = "hansaFlexMonitoring@gmail.com"
+        receiver_email = "frank.rogalski@hansa-flex.com"
+        message = """\
 Subject: Prod Down
 
 Das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gebenenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben"""
 
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, env.password)
-        server.sendmail(sender_email, receiver_email, message)
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, env.password)
+            server.sendmail(sender_email, receiver_email, message)
+    except Exception:
+        pass
 
 def check_availability():
     global last_send
