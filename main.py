@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -12,6 +12,7 @@ from threading import Thread
 import env
 import smtplib
 import ssl
+from random import randint
 
 def ping(url):
     try:
@@ -22,7 +23,7 @@ def ping(url):
     return False
 
 def insert(availiable, site, cur, con):
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    date = datetime.now().strftime(db_time)
     cur.execute(f"INSERT INTO availability VALUES('{date}', '{availiable}', '{site}')")
     con.commit()
     
@@ -69,11 +70,11 @@ def type_to_number(line):
 def form(num, _):
     return {1: "Online", 0.5: "Lokale Probleme", 0: "Offline"}[num]
 
-def update_data(now):
+def update_data(start, end):
     with sqlite3.connect(db_name) as con:
-        date = (now - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
-        df = pd.read_sql(f"SELECT * FROM availability WHERE date > '{date}'", con, parse_dates=["date"])
-        df.set_index("date", inplace=True)
+        start = datetime.strptime(start, usr_time).strftime(db_time)
+        end = datetime.strptime(end, usr_time).strftime(db_time)
+        df = pd.read_sql(f"SELECT * FROM availability WHERE date > '{start}' and date < '{end}'", con, parse_dates=["date"], index_col="date")
         data = df.apply(type_to_number, axis=1)
         ax = data.plot(
             figsize=(20, 10),
@@ -100,8 +101,9 @@ def update_data(now):
 
 matplotlib.use('Agg')
 db_name = "logs.db"
-last_update = datetime.now() - timedelta(minutes=1)
 last_send = datetime.now() - timedelta(minutes=5)
+db_time = "%Y-%m-%d %H:%M:%S"
+usr_time = "%Y-%m-%dT%H:%M"
 up=None
 options = {
     0: "Nein", 
@@ -117,14 +119,13 @@ Thread(target=check_availability).start()
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def hello_world():
+    start = request.args.get('start', default=(datetime.now() - timedelta(hours=24)).strftime(usr_time), type = str)
+    end = request.args.get('end', default=datetime.now().strftime(usr_time), type = str)
     global up, last_update
-    now = datetime.now()
-    if last_update < now - timedelta(minutes=1):
-        up = update_data(now)
-        last_update = now
-    return render_template('hello.html', up=up)
+    up = update_data(start, end)
+    return render_template('hello.html', up=up, ran=randint(0, 1_000_000_000))
 
 if __name__ == '__main__':
     app.run(port=5000, host="0.0.0.0")

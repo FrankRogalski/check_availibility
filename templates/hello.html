@@ -1,17 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Ist HANSA-FLEX online?</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
     <style>
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
         h1 {
             text-align: center;
         }
-        
+
         h2 {
             text-align: center;
         }
-        
+
+        input {
+            text-align: center;
+            margin: 1rem;
+            font-size: 1.5rem;
+        }
+
+        label {
+            font-size: 1.5rem;
+        }
+
+        form {
+            text-align: center;
+            display: flex;
+            justify-content: space-evenly;
+        }
+
         img {
             display: block;
             margin-left: auto;
@@ -20,9 +42,33 @@
         }
     </style>
 </head>
+
 <body>
-   <h1>ist die HANSA-FLEX Website gerade online?</h1>
-   <h2>{{ up }}</h2>
-   <img src="{{ url_for('static', filename= 'test.png') }}" alt="Ein Bild der momentanen System Verfügbarkeit von HANSA-FLEX" />
+    <h1>ist die HANSA-FLEX Website gerade online?</h1>
+    <h2>{{ up }}</h2>
+    <form method="get" action="/">
+        <div>
+            <label for="start">Wähle eine Startzeit im Format yyyy-mm-ddTHH:MM</label><br>
+            <input type="text" id="start" name="start">
+        </div>
+        <input type="submit" id="sub" value="Abfrage losschicken">
+        <div>
+            <label for="start">Wähle eine Endzeit im Format yyyy-mm-ddTHH:MM</label><br>
+            <input type="text" id="end" name="end">
+        </div>
+    </form>
+    <img src="{{ url_for('static', filename= 'test.png') }}?rofl={{ ran }}"
+        alt="Ein Bild der momentanen System Verfügbarkeit von HANSA-FLEX" />
+    <script>
+        window.onload = function () {
+            let date = new Date();
+            let end = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + "T" + date.getHours() + ":" + date.getMinutes();
+            date.setDate(date.getDate() - 1);
+            let start = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + "T" + date.getHours() + ":" + date.getMinutes();
+            document.getElementById("end").value = end;
+            document.getElementById("start").value = start;
+        }
+    </script>
 </body>
+
 </html>
