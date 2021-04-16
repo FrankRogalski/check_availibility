@@ -7,7 +7,7 @@ from matplotlib.ticker import FuncFormatter
 from datetime import datetime, timedelta
 import sqlite3
 import requests
-from time import sleep
+from time import sleep, strftime
 from threading import Thread
 import env
 import smtplib
@@ -96,7 +96,7 @@ def update_data(start, end):
             rot=0,
         )
         ax.get_yaxis().set_major_formatter(FuncFormatter(form))
-        ax.get_xaxis().set_major_formatter(DateFormatter("%d.%m %H:%M"))
+        ax.get_xaxis().set_major_formatter(DateFormatter(display_time))
         byte = BytesIO()
         ax.get_figure().savefig(byte, bbox_inches='tight', format="jpg")
         byte.seek(0)
@@ -108,13 +108,14 @@ def update_data(start, end):
             newest_data = newest_data.iloc[-1]
         except AttributeError:
             pass
-        return options[newest_data], img
+        return options[newest_data], img, [i.strftime(display_time) for i in data[data == 0].index]
 
 matplotlib.use('Agg')
 db_name = "logs.db"
 last_send = datetime.now() - timedelta(minutes=5)
 db_time = "%Y-%m-%d %H:%M:%S"
 usr_time = "%Y-%m-%dT%H:%M"
+display_time = "%d.%m %H:%M"
 up=None
 options = {
     0: "Nein", 
@@ -135,8 +136,8 @@ def hello_world():
     start = request.args.get('start', default=(datetime.now() - timedelta(hours=24)).strftime(usr_time), type = str)
     end = request.args.get('end', default=datetime.now().strftime(usr_time), type = str)
     global up, last_update
-    up, img = update_data(start, end)
-    return render_template('hello.html', up=up, img=img)
+    up, img, downtimes = update_data(start, end)
+    return render_template('hello.html', up=up, img=img, downtimes=downtimes)
 
 if __name__ == '__main__':
     app.run(port=5000, host="0.0.0.0")

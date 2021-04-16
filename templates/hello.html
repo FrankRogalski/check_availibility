@@ -10,6 +10,14 @@
         * {
             font-family: 'Roboto', sans-serif;
         }
+
+        body {
+            width: 80%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         h1 {
             text-align: center;
         }
@@ -34,17 +42,26 @@
             justify-content: space-evenly;
         }
 
+        .downtimes {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+            margin-bottom: 5rem;
+        }
+
+        .downtime {
+            margin: 1rem;
+        }
+
+
         img {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 80%;
+            width: 100%;
         }
     </style>
 </head>
 
 <body>
-    <h1>ist die HANSA-FLEX Website gerade online?</h1>
+    <h1>Ist die HANSA-FLEX Website gerade online?</h1>
     <h2>{{ up }}</h2>
     <form method="get" action="/">
         <div>
@@ -59,6 +76,15 @@
     </form>
     <img src="data:image/jpg;base64,{{ img }}"
         alt="Ein Bild der momentanen System Verfügbarkeit von HANSA-FLEX" />
+
+    <h2>Aufgezeichnete Downtimes</h2>
+    <div class="downtimes">
+        {% for down in downtimes %}
+            <div class="downtime">
+                {{ down }}
+            </div>
+        {% endfor %}
+    </div>
     <script>
         window.onload = function () {
             let date = new Date();
