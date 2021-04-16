@@ -33,7 +33,22 @@ def send_mail():
         port = 465 
         smtp_server = "smtp.gmail.com"
         sender_email = "hansaFlexMonitoring@gmail.com"
-        receiver_email = "frank.rogalski@hansa-flex.com"
+        receiver_email = (
+            "frank.rogalski@hansa-flex.com", 
+            "v.hinrichs@neusta.de", 
+            "t.boettjer@neusta.de", 
+            "c.junge@neusta.de", 
+            "s.lohmann@neusta.de", 
+            "dariusz.kurtycz@hansa-flex.com",
+            "rika.stelljes@hansa-flex.com",
+            "d.kessler@hansa-flex.com",
+            "viktor.lipps@hansa-flex.com",
+            "timo.wendt@hansa-flex.com",
+            "juliemarie.garms@hansa-flex.com",
+            "dario.gelzer@hansa-flex.com",
+            "olga.kulesh@hec.de",
+            "p.koehler@neusta.de"
+        )
         message = """\
 Subject: Prod Down
 Moinsen,
