@@ -12,7 +12,6 @@ from threading import Thread
 import env
 import smtplib
 import ssl
-from random import randint
 from io import BytesIO
 import base64
 
@@ -37,8 +36,12 @@ def send_mail():
         receiver_email = "frank.rogalski@hansa-flex.com"
         message = """\
 Subject: Prod Down
+Moinsen,
 
-Das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gebenenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben"""
+das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gegebenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben
+
+Gruß
+Frank's Python script"""
 
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
@@ -133,7 +136,7 @@ def hello_world():
     end = request.args.get('end', default=datetime.now().strftime(usr_time), type = str)
     global up, last_update
     up, img = update_data(start, end)
-    return render_template('hello.html', up=up, ran=randint(0, 1_000_000_000), img=img)
+    return render_template('hello.html', up=up, img=img)
 
 if __name__ == '__main__':
     app.run(port=5000, host="0.0.0.0")
