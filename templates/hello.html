@@ -57,7 +57,7 @@
             <input type="text" id="end" name="end">
         </div>
     </form>
-    <img src="{{ url_for('static', filename= 'test.png') }}?rofl={{ ran }}"
+    <img src="data:image/jpg;base64,{{ img }}"
         alt="Ein Bild der momentanen System Verfügbarkeit von HANSA-FLEX" />
     <script>
         window.onload = function () {

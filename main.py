@@ -13,6 +13,8 @@ import env
 import smtplib
 import ssl
 from random import randint
+from io import BytesIO
+import base64
 
 def ping(url):
     try:
@@ -92,7 +94,10 @@ def update_data(start, end):
         )
         ax.get_yaxis().set_major_formatter(FuncFormatter(form))
         ax.get_xaxis().set_major_formatter(DateFormatter("%d.%m %H:%M"))
-        ax.get_figure().savefig("static/test.png", bbox_inches='tight')
+        byte = BytesIO()
+        ax.get_figure().savefig(byte, bbox_inches='tight', format="jpg")
+        byte.seek(0)
+        img = base64.b64encode(byte.read()).decode()
         plt.clf()
         max_index = data.index.max()
         newest_data = data[max_index]
@@ -100,7 +105,7 @@ def update_data(start, end):
             newest_data = newest_data.iloc[-1]
         except AttributeError:
             pass
-        return options[newest_data]
+        return options[newest_data], img
 
 matplotlib.use('Agg')
 db_name = "logs.db"
@@ -127,8 +132,8 @@ def hello_world():
     start = request.args.get('start', default=(datetime.now() - timedelta(hours=24)).strftime(usr_time), type = str)
     end = request.args.get('end', default=datetime.now().strftime(usr_time), type = str)
     global up, last_update
-    up = update_data(start, end)
-    return render_template('hello.html', up=up, ran=randint(0, 1_000_000_000))
+    up, img = update_data(start, end)
+    return render_template('hello.html', up=up, ran=randint(0, 1_000_000_000), img=img)
 
 if __name__ == '__main__':
     app.run(port=5000, host="0.0.0.0")
