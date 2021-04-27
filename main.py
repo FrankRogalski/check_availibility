@@ -155,4 +155,4 @@ def hello_world():
     return render_template('hello.html', up=up, img=img, downtimes=downtimes)
 
 if __name__ == '__main__':
-    app.run(port=5000, host="0.0.0.0")
+    app.run(port=80, host="0.0.0.0")
