@@ -62,8 +62,8 @@ Frank's Python script"""
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(sender_email, env.password)
             server.sendmail(sender_email, receiver_email, message)
-    except Exception:
-        pass
+    except Exception as e:
+        print("error sending mail", e)
 
 def check_availability():
     global last_send
