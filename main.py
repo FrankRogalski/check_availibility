@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -156,3 +156,8 @@ def hello_world():
 
 if __name__ == '__main__':
     app.run(port=80, host="0.0.0.0")
+
+@app.route("/sendmail", methods=["POST"])
+def sendmail():
+    print("swag yolo", request.args("test", type=str))
+    return Response(status=200)
