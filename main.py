@@ -154,10 +154,10 @@ def hello_world():
     up, img, downtimes = update_data(start, end)
     return render_template('hello.html', up=up, img=img, downtimes=downtimes)
 
-if __name__ == '__main__':
-    app.run(port=80, host="0.0.0.0")
-
 @app.route("/sendmail", methods=["POST"])
 def sendmail():
     print("swag yolo", request.args("test", type=str))
     return Response(status=200)
+
+if __name__ == '__main__':
+    app.run(port=80, host="0.0.0.0")
