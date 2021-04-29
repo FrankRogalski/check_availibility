@@ -7,7 +7,7 @@ from matplotlib.ticker import FuncFormatter
 from datetime import datetime, timedelta
 import sqlite3
 import requests
-from time import sleep, strftime
+from time import sleep
 from threading import Thread
 import env
 import smtplib
@@ -63,7 +63,7 @@ Frank's Python script"""
             server.login(sender_email, env.password)
             server.sendmail(sender_email, receiver_email, message)
     except Exception as e:
-        print("error sending mail", e)
+        app.logger.exception(e)
 
 def check_availability():
     global last_send
@@ -156,7 +156,7 @@ def hello_world():
 
 @app.route("/sendmail", methods=["POST"])
 def sendmail():
-    print("swag yolo", request.args.get("test", type=str))
+    app.logger.info("swag yolo", request.args.get("test", type=str))
     return Response(status=200)
 
 if __name__ == '__main__':
