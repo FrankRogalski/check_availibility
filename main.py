@@ -55,7 +55,7 @@ Moinsen,
 
 das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gegebenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben
 
-Gruß
+Gruss
 Frank's Python script"""
 
         context = ssl.create_default_context()
