@@ -156,7 +156,7 @@ def hello_world():
 
 @app.route("/sendmail", methods=["POST"])
 def sendmail():
-    app.logger.warning("%s swag yolo", request.args.get("test", type=str))
+    app.logger.warning("%s swag yolo", str(request.form.to_dict()))
     return Response(status=200)
 
 if __name__ == '__main__':
