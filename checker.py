@@ -68,8 +68,7 @@ if __name__ == "__main__":
         cur.execute("CREATE TABLE IF NOT EXISTS availability (date text, up boolean, site text)")
         cur.execute("CREATE INDEX IF NOT EXISTS availability_index on availability(date)")
     logging.basicConfig(
-        filename='log.txt', 
-        encoding="utf-8", 
+        filename='log.txt',
         level=logging.INFO, 
         datefmt="%Y-%m-%d %H:%M:%S", 
         format="%(asctime)s %(levelname)-8s %(message)s"
