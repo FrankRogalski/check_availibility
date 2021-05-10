@@ -6,83 +6,9 @@ from matplotlib.dates import DateFormatter
 from matplotlib.ticker import FuncFormatter
 from datetime import datetime, timedelta
 import sqlite3
-import requests
-from time import sleep
-from threading import Thread
-import env
-import smtplib
-import ssl
 from io import BytesIO
 import base64
-
-def ping(url):
-    try:
-        response = requests.get(url, timeout=15)
-        return response.status_code == 200
-    except Exception:
-        pass
-    return False
-
-def insert(availiable, site, cur, con):
-    date = datetime.now().strftime(db_time)
-    cur.execute(f"INSERT INTO availability VALUES('{date}', '{availiable}', '{site}')")
-    con.commit()
-    
-def send_mail():
-    try:
-        port = 465 
-        smtp_server = "smtp.gmail.com"
-        sender_email = "hansaFlexMonitoring@gmail.com"
-        receiver_email = (
-            "frank.rogalski@hansa-flex.com", 
-            "v.hinrichs@neusta.de", 
-            "t.boettjer@neusta.de", 
-            "c.junge@neusta.de", 
-            "s.lohmann@neusta.de", 
-            "dariusz.kurtycz@hansa-flex.com",
-            "rika.stelljes@hansa-flex.com",
-            "d.kessler@hansa-flex.com",
-            "viktor.lipps@hansa-flex.com",
-            "timo.wendt@hansa-flex.com",
-            "juliemarie.garms@hansa-flex.com",
-            "dario.gelzer@hansa-flex.com",
-            "olga.kulesh@hec.de",
-            "p.koehler@neusta.de"
-        )
-        message = """\
-Subject: Prod Down
-Moinsen,
-
-das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gegebenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben
-
-Gruss
-Frank's Python script"""
-
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, env.password)
-            server.sendmail(sender_email, receiver_email, message)
-    except Exception as e:
-        app.logger.exception(e)
-
-def check_availability():
-    global last_send
-    with sqlite3.connect(db_name) as con:
-        url_to_check = "https://shop.hansa-flex.com/"
-        sanity_url = "https://google.com"
-        cur = con.cursor()
-        while True:
-            if not ping(sanity_url):
-                insert("false", "google", cur, con)
-            elif not ping(url_to_check):
-                insert("false", "shop", cur, con)
-                now = datetime.now()
-                if last_send < now - timedelta(minutes=5):
-                    send_mail()
-                    last_send = now
-            else:
-                insert("true", "shop", cur, con)
-            sleep(60)
+import os
 
 def type_to_number(line):
     if line["up"] == "true":
@@ -93,7 +19,7 @@ def type_to_number(line):
 def form(num, _):
     return {1: "Online", 0.5: "Lokale Probleme", 0: "Offline"}[num]
 
-def update_data(start, end):
+def read_data(start, end):
     with sqlite3.connect(db_name) as con:
         start = datetime.strptime(start, usr_time).strftime(db_time)
         end = datetime.strptime(end, usr_time).strftime(db_time)
@@ -125,33 +51,30 @@ def update_data(start, end):
             pass
         return options[newest_data], img, [i.strftime(display_time) for i in data[data == 0].index]
 
-matplotlib.use('Agg')
-db_name = "logs.db"
-last_send = datetime.now() - timedelta(minutes=5)
-db_time = "%Y-%m-%d %H:%M:%S"
-usr_time = "%Y-%m-%dT%H:%M"
-display_time = "%d.%m %H:%M"
-up=None
-options = {
-    0: "Nein", 
-    1: "Ja", 
-    0.5: "Weiß nicht mein Internet ist down"
-}
-with sqlite3.connect(db_name) as con:
-    cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS availability (date text, up boolean, site text)")
-    cur.execute("CREATE INDEX IF NOT EXISTS availability_index on availability(date)")
+if __name__ == '__main__':
+    matplotlib.use('Agg')
+    path = os.path.dirname(__file__)
+    db_name = os.path.join(path, "logs.db")
+    db_time = "%Y-%m-%d %H:%M:%S"
+    usr_time = "%Y-%m-%dT%H:%M"
+    display_time = "%d.%m %H:%M"
+    options = {
+        0: "Nein", 
+        1: "Ja", 
+        0.5: "Vielleicht, momentan existieren lokale Probleme"
+    }
+    with sqlite3.connect(db_name) as con:
+        cur = con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS availability (date text, up boolean, site text)")
+        cur.execute("CREATE INDEX IF NOT EXISTS availability_index on availability(date)")
 
-Thread(target=check_availability).start()
-
-app = Flask(__name__)
+    app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
-def hello_world():
+def get_uptime():
     start = request.args.get('start', default=(datetime.now() - timedelta(hours=24)).strftime(usr_time), type = str)
     end = request.args.get('end', default=datetime.now().strftime(usr_time), type = str)
-    global up, last_update
-    up, img, downtimes = update_data(start, end)
+    up, img, downtimes = read_data(start, end)
     return render_template('hello.html', up=up, img=img, downtimes=downtimes)
 
 @app.route("/sendmail", methods=["POST"])
