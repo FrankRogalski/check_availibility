@@ -39,10 +39,12 @@ def read_data(start, end):
         ax.get_yaxis().set_major_formatter(FuncFormatter(form))
         ax.get_xaxis().set_major_formatter(DateFormatter(display_time))
         byte = BytesIO()
-        ax.get_figure().savefig(byte, bbox_inches='tight', format="jpg")
+        f = ax.get_figure()
+        f.savefig(byte, bbox_inches='tight', format="jpg")
         byte.seek(0)
         img = base64.b64encode(byte.read()).decode()
-        plt.clf()
+        f.clear()
+        plt.close(f)
         max_index = data.index.max()
         newest_data = data[max_index]
         try:
