@@ -9,6 +9,7 @@ import sqlite3
 from io import BytesIO
 import base64
 import os
+import sys
 
 def type_to_number(line):
     if line["up"] == "true":
@@ -40,6 +41,7 @@ def read_data(start, end):
     ax.get_xaxis().set_major_formatter(DateFormatter(display_time))
     byte = BytesIO()
     f = ax.get_figure()
+    f.canvas.start_event_loop(sys.float_info.min)
     f.savefig(byte, bbox_inches='tight', format="jpg")
     byte.seek(0)
     img = base64.b64encode(byte.read()).decode()
