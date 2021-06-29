@@ -7,12 +7,13 @@ from datetime import datetime, timedelta
 import env
 import logging
 import os
+import threading
 
 def ping(url):
     try:
         response = requests.get(url, timeout=15)
-        return response.status_code == 200
-    except Exception:
+        return response.status_code // 100 in (2, 3)
+    except:
         pass
     return False
 
@@ -60,9 +61,27 @@ das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt 
 
 Gruss
 Frank's Python script"""
+
+url_to_check = "https://shop.hansa-flex.com/"
+sanity_url = "https://google.com"
+path = os.path.dirname(__file__)
+db_name = os.path.join(path, "logs.db")
+last_send = datetime.now() - timedelta(minutes=5)
+
+def write_db():
+    global last_send
+    if not ping(sanity_url):
+        insert("false", "google")
+    elif not ping(url_to_check):
+        insert("false", "shop")
+        now = datetime.now()
+        if last_send < now - timedelta(minutes=5):
+            send_mail()
+            last_send = now
+    else:
+        insert("true", "shop")
+
 if __name__ == "__main__":
-    path = os.path.dirname(__file__)
-    db_name = os.path.join(path, "logs.db")
     with sqlite3.connect(db_name) as con:
         cur = con.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS availability (date text, up boolean, site text)")
@@ -74,18 +93,6 @@ if __name__ == "__main__":
         format="%(asctime)s %(levelname)-8s %(message)s"
     )
     db_time = "%Y-%m-%d %H:%M:%S"
-    last_send = datetime.now() - timedelta(minutes=5)
-    url_to_check = "https://shop.hansa-flex.com/"
-    sanity_url = "https://google.com"
     while True:
-        if not ping(sanity_url):
-            insert("false", "google")
-        elif not ping(url_to_check):
-            insert("false", "shop")
-            now = datetime.now()
-            if last_send < now - timedelta(minutes=5):
-                send_mail()
-                last_send = now
-        else:
-            insert("true", "shop")
-        sleep(60)
+        threading.Thread(target=write_db).start()
+        sleep(30)
