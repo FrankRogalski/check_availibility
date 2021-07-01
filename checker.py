@@ -4,7 +4,7 @@ import ssl
 from time import sleep
 import sqlite3
 from datetime import datetime, timedelta
-from . import env
+import env
 import logging
 import os
 import threading

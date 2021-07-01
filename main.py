@@ -10,7 +10,7 @@ from io import BytesIO
 import base64
 import os
 import sys
-from . import env
+import env
 
 def type_to_number(line):
     if line["up"] == "true":
