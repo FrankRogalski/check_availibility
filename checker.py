@@ -4,7 +4,7 @@ import ssl
 from time import sleep
 import sqlite3
 from datetime import datetime, timedelta
-import env
+from . import env
 import logging
 import os
 import threading
@@ -95,4 +95,4 @@ if __name__ == "__main__":
     db_time = "%Y-%m-%d %H:%M:%S"
     while True:
         threading.Thread(target=write_db).start()
-        sleep(30)
+        sleep(15)

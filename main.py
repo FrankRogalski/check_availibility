@@ -10,6 +10,7 @@ from io import BytesIO
 import base64
 import os
 import sys
+from . import env
 
 def type_to_number(line):
     if line["up"] == "true":
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     db_name = os.path.join(path, "logs.db")
     db_time = "%Y-%m-%d %H:%M:%S"
     usr_time = "%Y-%m-%dT%H:%M"
-    display_time = "%d.%m %H:%M"
+    display_time = "%d.%m %H:%M:%S"
     options = {
         0: "Nein", 
         1: "Ja", 
@@ -87,4 +88,4 @@ def sendmail():
     return Response(status=200)
 
 if __name__ == '__main__':
-    app.run(port=80, host="0.0.0.0")
+    app.run(port=443, host="0.0.0.0", ssl_context=(env.cert, env.key))
