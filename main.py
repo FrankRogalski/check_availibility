@@ -84,7 +84,9 @@ def get_uptime():
 
 @app.route("/sendmail", methods=["POST"])
 def sendmail():
-    app.logger.warning("%s swag yolo", str(request.form.to_dict()))
+    app.logger.warning("%s form", str(request.form.to_dict()))
+    app.logger.warning("%s args", str(request.args.to_dict()))
+    app.logger.warning("%s args", str(request.get_data()))
     return Response(status=200)
 
 if __name__ == '__main__':
