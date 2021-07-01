@@ -91,7 +91,8 @@ def sendmail():
         app.logger.warn('%s data', str(data))
         try:
             mail_sender.send_mail(**data)
-        except:
+        except Exception as e:
+            app.logger.warn(e)
             return Response(status=510)
         return Response(status=201)
     return Response(status=401)
