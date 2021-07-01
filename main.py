@@ -11,6 +11,7 @@ import base64
 import os
 import sys
 import env
+import mail_sender
 
 def type_to_number(line):
     if line["up"] == "true":
@@ -84,10 +85,21 @@ def get_uptime():
 
 @app.route("/sendmail", methods=["POST"])
 def sendmail():
-    app.logger.warning("%s form", str(request.form.to_dict()))
-    app.logger.warning("%s args", str(request.args.to_dict()))
-    app.logger.warning("%s args", str(request.get_data()))
-    return Response(status=200)
+    data = request.get_json(force=True)
+    if data['password'] == env.mail_password and len(data.keys()) == 4:
+        del data['password']
+        try:
+            mail_sender.send_mail(**data)
+        except:
+            return Response(status=510)
+        return Response(status=201)
+    return Response(status=401)
 
 if __name__ == '__main__':
-    app.run(port=443, host="0.0.0.0", ssl_context=(env.cert, env.key))
+    if 'cert' in vars(env).keys():
+        context = (env.cert, env.key)
+        port = 443
+    else:
+        context = None
+        port = 80
+    app.run(port=port, host="0.0.0.0", ssl_context=context)

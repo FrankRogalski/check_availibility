@@ -1,6 +1,4 @@
 import requests
-import smtplib
-import ssl
 from time import sleep
 import sqlite3
 from datetime import datetime, timedelta
@@ -8,6 +6,7 @@ import env
 import logging
 import os
 import threading
+import mail_sender
 
 def ping(url):
     try:
@@ -23,44 +22,36 @@ def insert(availiable, site):
         date = datetime.now().strftime(db_time)
         cur.execute(f"INSERT INTO availability VALUES('{date}', '{availiable}', '{site}')")
         con.commit()
-    
+
 def send_mail():
     try:
-        port = 465 
-        smtp_server = "smtp.gmail.com"
-        sender_email = "hansaFlexMonitoring@gmail.com"
-        receiver_email = (
-            "frank.rogalski@hansa-flex.com", 
-            "v.hinrichs@neusta.de", 
-            "t.boettjer@neusta.de", 
-            "c.junge@neusta.de", 
-            "s.lohmann@neusta.de", 
-            "dariusz.kurtycz@hansa-flex.com",
-            "rika.stelljes@hansa-flex.com",
-            "d.kessler@hansa-flex.com",
-            "viktor.lipps@hansa-flex.com",
-            "timo.wendt@hansa-flex.com",
-            "juliemarie.garms@hansa-flex.com",
-            "dario.gelzer@hansa-flex.com",
-            "olga.kulesh@hec.de",
-            "p.koehler@neusta.de"
-        )
-        
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, env.password)
-            server.sendmail(sender_email, receiver_email, message)
+        mail_sender.send_mail(receiver_emails, "Prod Down", message)
     except Exception as e:
         logging.error("Error sending mail %s", e)
 
 message = """\
-Subject: Prod Down
 Moinsen,
 
 das Produktivsystem ist gerade anscheinend down. Bitte prueft dies und erstellt gegebenenfalls ein Ticket wie in dem SAP Ticket https://launchpad.support.sap.com/#/incident/pointer/002075129500002491562021 beschrieben
 
 Gruss
 Frank's Python script"""
+receiver_emails = (
+    "frank.rogalski@hansa-flex.com", 
+    "v.hinrichs@neusta.de", 
+    "t.boettjer@neusta.de", 
+    "c.junge@neusta.de", 
+    "s.lohmann@neusta.de", 
+    "dariusz.kurtycz@hansa-flex.com",
+    "rika.stelljes@hansa-flex.com",
+    "d.kessler@hansa-flex.com",
+    "viktor.lipps@hansa-flex.com",
+    "timo.wendt@hansa-flex.com",
+    "juliemarie.garms@hansa-flex.com",
+    "dario.gelzer@hansa-flex.com",
+    "olga.kulesh@hec.de",
+    "p.koehler@neusta.de"
+)
 
 url_to_check = "https://shop.hansa-flex.com/"
 sanity_url = "https://google.com"
