@@ -88,6 +88,7 @@ def sendmail():
     data = request.get_json(force=True)
     if data['password'] == env.mail_password and len(data.keys()) == 4:
         del data['password']
+        app.logger.warn('%s data', str(data))
         try:
             mail_sender.send_mail(**data)
         except:
