@@ -78,8 +78,9 @@ if __name__ == '__main__':
 
 @app.route('/', methods=['GET'])
 def get_uptime():
-    start = request.args.get('start', default=(datetime.now() - timedelta(hours=24)).strftime(usr_time), type = str)
-    end = request.args.get('end', default=datetime.now().strftime(usr_time), type = str)
+    now = datetime.now()
+    start = request.args.get('start', default=(now - timedelta(hours=24)).strftime(usr_time), type = str)
+    end = request.args.get('end', default=now.strftime(usr_time), type = str)
     up, img, downtimes = read_data(start, end)
     return render_template('hello.html', up=up, img=img, downtimes=downtimes, start=start, end=end)
 
