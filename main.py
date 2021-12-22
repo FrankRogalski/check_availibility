@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     app = Flask(__name__)
 
-@app.route('/', methods=['GET'])
+#@app.route('/', methods=['GET'])
 def get_uptime():
     now = datetime.now()
     start = request.args.get('start', default=(now - timedelta(hours=24)).strftime(usr_time), type = str)

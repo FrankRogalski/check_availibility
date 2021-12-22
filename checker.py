@@ -67,7 +67,7 @@ def write_db():
         insert("false", "shop")
         now = datetime.now()
         if last_send < now - timedelta(minutes=5):
-            send_mail()
+            #send_mail()
             last_send = now
     else:
         insert("true", "shop")
